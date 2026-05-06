@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ipaddress
 
 def parse_targets(target_str):

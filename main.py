@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import time
 from goscan.utils.target_parser import parse_targets

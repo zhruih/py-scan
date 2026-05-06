@@ -31,8 +31,8 @@ class Discovery:
         # 优化点：打乱扫描顺序，防止瞬时网络风暴压垮网关
         random.shuffle(ips)
         
-        print(f"[*] Starting ultra-fast discovery for {len(ips)} targets...")
-        print(f"[*] Concurrency: {threads} threads | Timeout: {self.timeout}s")
+        print("[*] Starting ultra-fast discovery for {} targets...".format(len(ips)))
+        print("[*] Concurrency: {} threads | Timeout: {}s".format(threads, self.timeout))
         
         alive_ips = []
         # Python 线程在大规模 IO 场景下比 Process 更有优势，
@@ -44,7 +44,11 @@ class Discovery:
                 res = future.result()
                 if res:
                     alive_ips.append(res)
-                    print(f"[+] Found alive: {res:<15}", end='\r')
+                    # 使用 format 兼容旧版本输出
+                    output = "[+] Found alive: {:<15}".format(res)
+                    import sys
+                    sys.stdout.write(output + '\r')
+                    sys.stdout.flush()
         
-        print(f"\n[+] Discovery finished. Total alive: {len(alive_ips)}")
+        print("\n[+] Discovery finished. Total alive: {}".format(len(alive_ips)))
         return alive_ips

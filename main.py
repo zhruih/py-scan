@@ -33,14 +33,14 @@ def main():
     discovery = Discovery(timeout=args.timeout)
     alive_hosts = discovery.run(all_ips, threads=args.threads)
 
-    print(f"\n[+] Discovery finished. Found {len(alive_hosts)} alive hosts.")
+    print("\n[+] Discovery finished. Found {} alive hosts.".format(len(alive_hosts)))
     for host in alive_hosts:
-        print(f"  -> {host}")
+        print("  -> {}".format(host))
 
     # 3. 接下来可以在这里针对 alive_hosts 进行端口扫描或漏洞检测
     
     end_time = time.time()
-    print(f"\n[*] Total time: {end_time - start_time:.2f} seconds.")
+    print("\n[*] Total time: {:.2f} seconds.".format(end_time - start_time))
 
 if __name__ == "__main__":
     main()

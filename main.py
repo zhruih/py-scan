@@ -18,26 +18,32 @@ def main():
     parser.add_argument("-i", "--ip", help="Target IP range (e.g. 192.168.1.0/24)", required=True)
     parser.add_argument("-t", "--threads", type=int, default=1000, help="Number of threads (default: 1000)")
     parser.add_argument("--timeout", type=float, default=0.3, help="Socket timeout (default: 0.3)")
+    parser.add_argument("--mode", choices=["host", "network"], default="host", help="Scan mode: host (ping all IPs) or network (sampling /24 subnets)")
 
     args = parser.parse_args()
 
-    # 1. 解析目标
-    all_ips = parse_targets(args.ip)
-    if not all_ips:
-        print("[!] No valid targets found.")
-        return
-
     start_time = time.time()
-    
-    # 2. 存活探测 (大网段算法优化的核心：先找活的)
     discovery = Discovery(timeout=args.timeout)
-    alive_hosts = discovery.run(all_ips, threads=args.threads)
 
-    print("\n[+] Discovery finished. Found {} alive hosts.".format(len(alive_hosts)))
-    for host in alive_hosts:
-        print("  -> {}".format(host))
+    if args.mode == "network":
+        # 针对大网段的优化：抽样探测存活的C段
+        alive_subnets = discovery.detect_networks(args.ip, threads=args.threads)
+        print("\n[+] Found {} active C-class networks:".format(len(alive_subnets)))
+        for net in alive_subnets:
+            print("  -> {}".format(net))
+    else:
+        # 1. 解析目标
+        all_ips = parse_targets(args.ip)
+        if not all_ips:
+            print("[!] No valid targets found.")
+            return
 
-    # 3. 接下来可以在这里针对 alive_hosts 进行端口扫描或漏洞检测
+        # 2. 存活探测
+        alive_hosts = discovery.run(all_ips, threads=args.threads)
+
+        print("\n[+] Discovery finished. Found {} alive hosts.".format(len(alive_hosts)))
+        for host in alive_hosts:
+            print("  -> {}".format(host))
     
     end_time = time.time()
     print("\n[*] Total time: {:.2f} seconds.".format(end_time - start_time))
